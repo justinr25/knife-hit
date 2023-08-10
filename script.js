@@ -72,6 +72,7 @@ class Knife {
 // implementation
 let circle
 let knives
+let pointOnRect
 let lastRenderTime
 
 function init() {
@@ -100,6 +101,10 @@ function init() {
         height: 100,
         color: '#8CAEBE'
     })]
+    pointOnRect = {
+        x: null,
+        y: null,
+    }
     lastRenderTime = 0
 }
 
@@ -133,8 +138,13 @@ function animate(currentTime) {
     circle.update()
     knives.forEach((knife) => {
         knife.update()
+    
+        pointOnRect.x = clamp(knife.position.x, knife.position.x + knife.width, circle.position.x)
+        pointOnRect.y = clamp(knife.position.y, knife.position.y + knife.height, circle.position.y)
+        if (Math.hypot(circle.position.x - knife.position.x, circle.position.y - knife.position.y) - circle.radius < 0) {
+            knife.velocity.y = 0
+        }
     })
-    console.log(knives)
 }
 
 init()
