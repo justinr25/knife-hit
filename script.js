@@ -17,6 +17,13 @@ addEventListener('resize', () => {
     cancelAnimationFrame(animationId)
 })
 
+// utility functions
+function clamp(min, max, value) {
+    if (value < min) return min
+    else if (value > max) return max
+    else return value
+}
+
 // objects
 class Circle {
     constructor({position, velocity, radius, color}) {
@@ -96,6 +103,23 @@ function init() {
     lastRenderTime = 0
 }
 
+function spawnKnife() {
+    knives.push(new Knife({
+        position: {
+            x: canvas.width / 2,
+            y: canvas.height - 200
+        },
+        velocity: {
+            x: 0,
+            y: -70
+        },
+        width: 25,
+        height: 100,
+        color: '#8CAEBE'
+
+    }))
+}
+
 // animation loop
 let animationId
 function animate(currentTime) {
@@ -117,18 +141,5 @@ init()
 animate()
 
 addEventListener('click', () => {
-    knives.push(new Knife({
-        position: {
-            x: canvas.width / 2,
-            y: canvas.height - 200
-        },
-        velocity: {
-            x: 0,
-            y: -70
-        },
-        width: 25,
-        height: 100,
-        color: '#8CAEBE'
-
-    }))
+    spawnKnife()
 })
