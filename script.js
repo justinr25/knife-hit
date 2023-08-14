@@ -26,11 +26,12 @@ function clamp(min, max, value) {
 
 // objects
 class Circle {
-    constructor({position, velocity, radius, color}) {
+    constructor({position, velocity, radius, color, health}) {
         this.position = position
         this.velocity = velocity
         this.radius = radius
         this.color = color
+        this.health = health
     }
 
     draw() {
@@ -46,33 +47,41 @@ class Circle {
 }
 
 class Knife {
-    constructor({position, velocity, width, height, color}) {
+    constructor({position, velocity, width, height, color, revolutionAngle, revolutionSpeed, hasCollided}) {
         this.position = position
         this.velocity = velocity
         this.width = width
         this.height = height
         this.color = color
+        this.revolutionAngle = revolutionAngle
+        this.revolutionSpeed = revolutionSpeed
+        this.hasCollided = hasCollided
     }
     
     draw() {
+        ctx.save()
         ctx.beginPath()
-        ctx.rect(this.position.x, this.position.y, this.width, this.height)
+        ctx.translate(this.position.x, this.position.y)
+        ctx.rotate(this.revolutionAngle)
+        ctx.rect(-this.width / 2, 0, this.width, this.height)
         ctx.fillStyle = this.color
         ctx.fill()
+        ctx.restore()
     }
 
     update() {
         this.draw()
 
         // update position of knife
+        this.position.x += this.velocity.x
         this.position.y += this.velocity.y
     }
 }
 
 // implementation
 let circle
+let firstKnife
 let knives
-let pointOnRect
 let lastRenderTime
 
 function init() {
@@ -86,9 +95,10 @@ function init() {
             y: 0
         },
         radius: 150,
-        color: '#fdd46d'
+        color: '#fdd46d',
+        health: 5
     })
-    knives = [new Knife({
+    firstKnife = new Knife({
         position: {
             x: canvas.width / 2,
             y: canvas.height - 200
@@ -98,14 +108,15 @@ function init() {
             y: 0
         },
         width: 25,
-        height: 100,
+        height: 80,
         color: '#8CAEBE'
-    })]
-    pointOnRect = {
-        x: null,
-        y: null,
-    }
+    })
+    knives = []
     lastRenderTime = 0
+}
+
+function gameOver() {
+    cancelAnimationFrame(animationId)
 }
 
 function spawnKnife() {
@@ -119,9 +130,12 @@ function spawnKnife() {
             y: -70
         },
         width: 25,
-        height: 100,
-        color: '#8CAEBE'
-
+        height: 80,
+        color: '#8CAEBE',
+        revolutionAngle: 0,
+        // revolutionSpeed: 1/10,
+        revolutionSpeed: 1/100,
+        hasCollided: false
     }))
 }
 
@@ -135,16 +149,29 @@ function animate(currentTime) {
 
     ctx.clearRect(0, 0, innerWidth, innerHeight)
 
-    circle.update()
+    firstKnife.draw()
     knives.forEach((knife) => {
         knife.update()
     
-        pointOnRect.x = clamp(knife.position.x, knife.position.x + knife.width, circle.position.x)
-        pointOnRect.y = clamp(knife.position.y, knife.position.y + knife.height, circle.position.y)
-        if (Math.hypot(circle.position.x - knife.position.x, circle.position.y - knife.position.y) - circle.radius < 0) {
-            knife.velocity.y = 0
+        // handle knife / circle collision
+        if (knife.position.y - knife.velocity.y < circle.position.y + circle.radius) {
+            // update circle health
+            if (!knife.hasCollided) circle.health--
+            knife.hasCollided = true
+
+            // update revolution angle of knife
+            knife.revolutionAngle += knife.revolutionSpeed
+            console.log(knife.revolutionAngle)
+
+            // update position of knife
+            knife.position.x = circle.position.x + 150 * Math.cos(knife.revolutionAngle + Math.PI * 0.5)
+            knife.position.y = circle.position.y + 150 * Math.sin(knife.revolutionAngle + Math.PI * 0.5)
         }
     })
+    circle.update()
+
+    // call game over when circle dies
+    if (circle.health == 0) gameOver()
 }
 
 init()
@@ -152,4 +179,8 @@ animate()
 
 addEventListener('click', () => {
     spawnKnife()
+})
+
+addEventListener('keydown', (event) => {
+    if (event.code == 'Space') cancelAnimationFrame(animationId)
 })
