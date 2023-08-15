@@ -94,7 +94,7 @@ function init() {
             x: 0,
             y: 0
         },
-        radius: 150,
+        radius: 100,
         color: '#fdd46d',
         health: 5
     })
@@ -133,8 +133,8 @@ function spawnKnife() {
         height: 80,
         color: '#8CAEBE',
         revolutionAngle: 0,
-        // revolutionSpeed: 1/10,
-        revolutionSpeed: 1/100,
+        revolutionSpeed: 1/4,
+        // revolutionSpeed: 1/100,
         hasCollided: false
     }))
 }
@@ -150,6 +150,10 @@ function animate(currentTime) {
     ctx.clearRect(0, 0, innerWidth, innerHeight)
 
     firstKnife.draw()
+
+    // call game over when circle dies
+    if (circle.health == 0) gameOver()
+
     knives.forEach((knife) => {
         knife.update()
     
@@ -164,14 +168,11 @@ function animate(currentTime) {
             console.log(knife.revolutionAngle)
 
             // update position of knife
-            knife.position.x = circle.position.x + 150 * Math.cos(knife.revolutionAngle + Math.PI * 0.5)
-            knife.position.y = circle.position.y + 150 * Math.sin(knife.revolutionAngle + Math.PI * 0.5)
+            knife.position.x = circle.position.x + circle.radius * Math.cos(knife.revolutionAngle + Math.PI * 0.5)
+            knife.position.y = circle.position.y + circle.radius * Math.sin(knife.revolutionAngle + Math.PI * 0.5)
         }
     })
     circle.update()
-
-    // call game over when circle dies
-    if (circle.health == 0) gameOver()
 }
 
 init()
@@ -181,6 +182,6 @@ addEventListener('click', () => {
     spawnKnife()
 })
 
-addEventListener('keydown', (event) => {
-    if (event.code == 'Space') cancelAnimationFrame(animationId)
-})
+// addEventListener('keydown', (event) => {
+//     if (event.code == 'Space') cancelAnimationFrame(animationId)
+// })
