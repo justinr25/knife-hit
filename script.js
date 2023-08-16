@@ -63,7 +63,7 @@ class Knife {
         ctx.beginPath()
         ctx.translate(this.position.x, this.position.y)
         ctx.rotate(this.revolutionAngle)
-        ctx.rect(-this.width / 2, 0, this.width, this.height)
+        ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height)
         ctx.fillStyle = this.color
         ctx.fill()
         ctx.restore()
